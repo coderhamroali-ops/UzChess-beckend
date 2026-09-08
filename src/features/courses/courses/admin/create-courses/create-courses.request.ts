@@ -1,75 +1,74 @@
-import { IsBoolean, IsInt, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateCoursesRequest {
   @Type(() => Number)
-  @IsInt()
-  @ApiProperty()
+  @IsNumber()
   authorId: number;
 
   @Type(() => Number)
-  @IsInt()
-  @ApiProperty()
+  @IsNumber()
   categoryId: number;
 
   @Type(() => Number)
-  @ApiProperty()
-  @IsInt()
+  @IsNumber()
   languageId: number;
 
   @Type(() => Number)
-  @ApiProperty()
-  @IsInt()
+  @IsNumber()
   difficultyId: number;
 
   @IsString()
-  @ApiProperty()
-  @MaxLength(128)
   title: string;
 
+  @IsOptional()
   @IsString()
-  @ApiProperty()
-  @MaxLength(128)
-  image: string;
+  image?: string;
 
   @Type(() => Number)
-  @ApiProperty()
-  @IsNumber({ maxDecimalPlaces: 2 })
+  @IsNumber()
   price: number;
 
-  @IsOptional()
-  @ApiProperty()
   @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
+  @IsOptional()
+  @IsNumber()
   newPrice?: number;
 
+
+  @Transform(({ value }) => {
+    if (typeof value === 'boolean') return value;
+
+    if (value === 'true' || value === '1') {
+      return true;
+    }
+
+    if (value === 'false' || value === '0') {
+      return false;
+    }
+
+    return undefined;
+  })
   @IsOptional()
-  @ApiProperty()
   @IsBoolean()
   isPublished?: boolean;
 
-  @IsOptional()
   @Type(() => Number)
-  @ApiProperty()
-  @IsInt()
+  @IsOptional()
+  @IsNumber()
   reviewsCount?: number;
 
-  @IsOptional()
   @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 1 })
-  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
   rating?: number;
 
-  @IsOptional()
   @Type(() => Number)
-  @IsInt()
-  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
   sectionsCount?: number;
 
-  @IsOptional()
   @Type(() => Number)
-  @IsInt()
-  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
   lessonsCount?: number;
 }

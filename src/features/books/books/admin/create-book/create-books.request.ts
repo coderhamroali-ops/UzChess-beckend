@@ -1,6 +1,8 @@
-import { IsDate, IsInt, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Allow, IsDate, IsInt, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { UploadedFile } from '@nestjs/common';
+
 export class CreateBooksRequest {
   @Type(() => Number)
   @IsInt()
@@ -31,10 +33,8 @@ export class CreateBooksRequest {
   @ApiProperty()
   description: string;
 
-  @IsOptional()
-  @IsString()
-  @MaxLength(128)
-  @ApiProperty()
+  @Allow()
+  @ApiProperty({ type: 'string', format: 'binary' })
   image?: string;
 
   @Type(() => Number)
