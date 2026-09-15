@@ -60,6 +60,9 @@ let GetAllBooksHandler = class GetAllBooksHandler {
             take: take,
             skip: skip
         });
+        for (let news of data){
+            news.image = 'http://localhost:8000' + '/' + news.image;
+        }
         return {
             totalPages,
             totalCount,

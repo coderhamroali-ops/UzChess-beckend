@@ -31,3 +31,5 @@ export class CreateBookLikesHandler {
     return await BookLikesEntity.save(newLike);
   }
 }
+
+console.log("Hello, Git!")

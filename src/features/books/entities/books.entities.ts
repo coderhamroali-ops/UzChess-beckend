@@ -35,7 +35,7 @@ export class BooksEntity extends BaseModel {
 
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   @ApiProperty()
-  price: number;
+  price?: number;
 
   @Column({ type: 'decimal', precision: 12, scale: 2, nullable: false })
   @ApiProperty()

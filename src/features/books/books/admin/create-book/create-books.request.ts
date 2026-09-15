@@ -40,7 +40,7 @@ export class CreateBooksRequest {
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
   @ApiProperty()
-  price: number;
+  price?: number;
 
   @IsOptional()
   @Type(() => Number)

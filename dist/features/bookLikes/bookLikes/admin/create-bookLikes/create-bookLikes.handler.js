@@ -44,5 +44,6 @@ let CreateBookLikesHandler = class CreateBookLikesHandler {
 CreateBookLikesHandler = _ts_decorate([
     (0, _common.Injectable)()
 ], CreateBookLikesHandler);
+console.log("Hello, Git!");
 
 //# sourceMappingURL=create-bookLikes.handler.js.map

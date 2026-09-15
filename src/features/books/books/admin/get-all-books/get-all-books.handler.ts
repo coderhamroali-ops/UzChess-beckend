@@ -39,13 +39,17 @@ export class GetAllBooksHandler {
       skip: skip,
 
     });
+
+    for (let news of data) {
+      news.image = 'http://localhost:8000' + '/' + news.image;
+    }
     return {
       totalPages,
       totalCount,
       currentPage,
       data,
       hasNext,
-      hasPrevious
+      hasPrevious,
     } as PaginatedResultDto<GetAllBooksRequest>;
   }
 }

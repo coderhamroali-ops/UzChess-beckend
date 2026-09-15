@@ -21,4 +21,4 @@ const AppDataSource = new _typeorm.DataSource({
     synchronize: false
 });
 
-//# sourceMappingURL=data-sorce.js.map
+//# sourceMappingURL=data-source.js.map

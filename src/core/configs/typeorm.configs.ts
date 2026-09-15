@@ -5,6 +5,6 @@ export const typeormConfigs: TypeOrmModuleOptions = {
   url: 'postgres://postgres:123@localhost:5432/uzchess-bekend',
   entities: ['dist/**/*.entities.js'],
   autoLoadEntities: true,
-  synchronize: true,
+  synchronize: false,
 };
 

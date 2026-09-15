@@ -15,7 +15,7 @@ const typeormConfigs = {
         'dist/**/*.entities.js'
     ],
     autoLoadEntities: true,
-    synchronize: true
+    synchronize: false
 };
 
 //# sourceMappingURL=typeorm.configs.js.map
