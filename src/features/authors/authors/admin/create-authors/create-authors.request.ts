@@ -7,4 +7,3 @@ export class CreateAuthorsRequest {
   @ApiProperty()
   fullName: string;
 }
-console.log("Hello, Git!")
