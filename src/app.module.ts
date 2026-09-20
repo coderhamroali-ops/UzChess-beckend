@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { typeormConfigs } from './core/configs/typeorm.configs';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
 import { BookCategoriesModule } from './features/Languges/book-categories.module';
 import { AuthorsModule } from './features/authors/authors.module';
 import { BooksModule } from './features/books/books.module';
@@ -36,7 +39,12 @@ import { TermsModule } from './features/terms/terms.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeormConfigs),
-    AppModule,
+
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
+    }),
+
     BookCategoriesModule,
     AuthorsModule,
     BooksModule,
@@ -68,7 +76,6 @@ import { TermsModule } from './features/terms/terms.module';
     ReportsModule,
     UsersLessonsModule,
     TermsModule,
-
   ],
 })
 export class AppModule {}

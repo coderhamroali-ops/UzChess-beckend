@@ -11,6 +11,8 @@ Object.defineProperty(exports, "AppModule", {
 const _common = require("@nestjs/common");
 const _typeormconfigs = require("./core/configs/typeorm.configs");
 const _typeorm = require("@nestjs/typeorm");
+const _servestatic = require("@nestjs/serve-static");
+const _path = require("path");
 const _bookcategoriesmodule = require("./features/Languges/book-categories.module");
 const _authorsmodule = require("./features/authors/authors.module");
 const _booksmodule = require("./features/books/books.module");
@@ -61,7 +63,10 @@ AppModule = _ts_decorate([
     (0, _common.Module)({
         imports: [
             _typeorm.TypeOrmModule.forRoot(_typeormconfigs.typeormConfigs),
-            AppModule,
+            _servestatic.ServeStaticModule.forRoot({
+                rootPath: (0, _path.join)(process.cwd(), 'uploads'),
+                serveRoot: '/uploads'
+            }),
             _bookcategoriesmodule.BookCategoriesModule,
             _authorsmodule.AuthorsModule,
             _booksmodule.BooksModule,

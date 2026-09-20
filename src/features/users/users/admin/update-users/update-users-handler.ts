@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ILike, Not } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 import { UpdateUsersRequest } from './update-users.request';
 import { UsersEntities } from '../../../entities/users.entities';
@@ -39,11 +40,15 @@ export class UpdateUsersHandler {
     user.profileImage = payload.profileImage;
     user.login = payload.login;
     user.loginType = payload.loginType;
-    user.password = payload.password;
+    if (payload.password) {
+      user.password = await bcrypt.hash(payload.password, 10);
+    }
     user.birthDate = payload.birthDate;
     user.isVerified = payload.isVerified;
     user.isActive = payload.isActive;
 
-    return await UsersEntities.save(user);
+    const saved = await UsersEntities.save(user);
+    const { password, ...result } = saved;
+    return result;
   }
 }

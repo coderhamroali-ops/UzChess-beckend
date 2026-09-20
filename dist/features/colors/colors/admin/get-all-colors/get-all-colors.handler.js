@@ -44,7 +44,8 @@ let GetAllColorsHandler = class GetAllColorsHandler {
         const data = await _colorsentities.ColorsEntities.find({
             select: {
                 title: true,
-                color: true
+                color: true,
+                id: true
             },
             take: take,
             skip: skip

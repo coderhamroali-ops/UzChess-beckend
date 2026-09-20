@@ -43,6 +43,7 @@ let GetAllBooksHandler = class GetAllBooksHandler {
         const hasPrevious = currentPage > 1;
         const data = await _booksentities.BooksEntity.find({
             select: {
+                id: true,
                 authorId: true,
                 categoryId: true,
                 languageId: true,
@@ -60,8 +61,10 @@ let GetAllBooksHandler = class GetAllBooksHandler {
             take: take,
             skip: skip
         });
-        for (let news of data){
-            news.image = 'http://localhost:8000' + '/' + news.image;
+        for (const book of data){
+            if (book.image) {
+                book.image = `http://localhost:8000/${book.image.replace(/\\/g, '/')}`;
+            }
         }
         return {
             totalPages,

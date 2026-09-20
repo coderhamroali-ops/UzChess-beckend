@@ -4,6 +4,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 import { UsersEntities } from '../../../entities/users.entities';
 import { CreateUsersRequest } from './create-user.request';
@@ -14,7 +15,8 @@ export class CreateUsersHandler {
   constructor(
     @InjectRepository(UsersEntities)
     private readonly usersRepository: Repository<UsersEntities>,
-  ) {}
+  ) {
+  }
 
   async execute(payload: CreateUsersRequest) {
 
@@ -32,12 +34,16 @@ export class CreateUsersHandler {
       profileImage: payload.profileImage,
       login: payload.login,
       loginType: payload.loginType,
-      password: payload.password,
+      password: payload.password
+        ? await bcrypt.hash(payload.password, 10)
+        : undefined,
       birthDate: payload.birthDate,
       isVerified: payload.isVerified ?? false,
       isActive: payload.isActive ?? false,
     });
 
-    return await this.usersRepository.save(newUser);
+    const saved = await this.usersRepository.save(newUser);
+    const { password, ...result } = saved;
+    return result;
   }
 }

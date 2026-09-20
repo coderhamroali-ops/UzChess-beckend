@@ -49,7 +49,6 @@ let GetAllUsersHandler = class GetAllUsersHandler {
                 profileImage: true,
                 login: true,
                 loginType: true,
-                password: true,
                 birthDate: true,
                 isVerified: true,
                 isActive: true

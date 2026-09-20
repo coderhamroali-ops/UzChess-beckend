@@ -21,6 +21,7 @@ export class GetAllBooksHandler {
 
     const data = await BooksEntity.find({
       select: {
+        id: true,
         authorId: true,
         categoryId: true,
         languageId: true,
@@ -40,8 +41,10 @@ export class GetAllBooksHandler {
 
     });
 
-    for (let news of data) {
-      news.image = 'http://localhost:8000' + '/' + news.image;
+    for (const book of data) {
+      if (book.image) {
+        book.image = `http://localhost:8000/${book.image.replace(/\\/g, '/')}`;
+      }
     }
     return {
       totalPages,
