@@ -20,14 +20,15 @@ import { CreateSouvenirsRequest } from './create-souvenirs/create-souvenirs.requ
 import { UpdateSouvenirsRequest } from './update-souvenirs/update-souvenirs.request';
 import { GetAllSouvenirsRequest } from './get-all-souvenirs/get-all-souvenirs.request';
 
-@Controller('souvenirs')
+@Controller('admin/souvenirs')
 export class SouvenirsController {
   constructor(
-    private  createSouvenirsHandler: CreateSouvenirsHandler,
-    private  getAllSouvenirsHandler: GetAllSouvenirsHandler,
-    private  updateSouvenirsHandler: UpdateSouvenirsHandler,
-    private  deleteSouvenirsHandler: DeleteSouvenirsHandler,
-  ) {}
+    private createSouvenirsHandler: CreateSouvenirsHandler,
+    private getAllSouvenirsHandler: GetAllSouvenirsHandler,
+    private updateSouvenirsHandler: UpdateSouvenirsHandler,
+    private deleteSouvenirsHandler: DeleteSouvenirsHandler,
+  ) {
+  }
 
   @Post('create')
   async create(@Body() payload: CreateSouvenirsRequest) {

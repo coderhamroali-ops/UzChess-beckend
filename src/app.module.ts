@@ -3,7 +3,7 @@ import { typeormConfigs } from './core/configs/typeorm.configs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-
+import { AuthModule } from './features/auth/auth.module';
 import { BookCategoriesModule } from './features/Languges/book-categories.module';
 import { AuthorsModule } from './features/authors/authors.module';
 import { BooksModule } from './features/books/books.module';
@@ -76,6 +76,7 @@ import { TermsModule } from './features/terms/terms.module';
     ReportsModule,
     UsersLessonsModule,
     TermsModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
