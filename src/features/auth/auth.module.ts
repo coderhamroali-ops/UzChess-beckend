@@ -1,7 +1,9 @@
 import { Global, Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { LoginHandler } from './login/login.handler';
+import { AuthGuard } from '../../core/guards/auth.guard';
 
 @Global()
 @Module({
@@ -13,6 +15,9 @@ import { LoginHandler } from './login/login.handler';
     }),
   ],
   controllers: [AuthController],
-  providers: [LoginHandler],
+  providers: [
+    LoginHandler,
+    { provide: APP_GUARD, useClass: AuthGuard },
+  ],
 })
 export class AuthModule {}

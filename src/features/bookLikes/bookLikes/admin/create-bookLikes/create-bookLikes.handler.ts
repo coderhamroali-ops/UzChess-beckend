@@ -32,4 +32,3 @@ export class CreateBookLikesHandler {
   }
 }
 
-console.log("Hello, Git!")
