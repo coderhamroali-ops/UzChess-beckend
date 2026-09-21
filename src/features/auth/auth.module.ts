@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { LoginHandler } from './login/login.handler';
+import { AdminSeedService } from './seed/admin-seed.service';
 import { AuthGuard } from '../../core/guards/auth.guard';
 
 @Global()
@@ -17,6 +18,7 @@ import { AuthGuard } from '../../core/guards/auth.guard';
   controllers: [AuthController],
   providers: [
     LoginHandler,
+    AdminSeedService,
     { provide: APP_GUARD, useClass: AuthGuard },
   ],
 })
