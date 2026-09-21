@@ -3,6 +3,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { LoginHandler } from './login/login.handler';
+import { RegisterHandler } from './register/register.handler';
+import { MeHandler } from './me/me.handler';
 import { AdminSeedService } from './seed/admin-seed.service';
 import { AuthGuard } from '../../core/guards/auth.guard';
 
@@ -18,6 +20,8 @@ import { AuthGuard } from '../../core/guards/auth.guard';
   controllers: [AuthController],
   providers: [
     LoginHandler,
+    RegisterHandler,
+    MeHandler,
     AdminSeedService,
     { provide: APP_GUARD, useClass: AuthGuard },
   ],

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { RequiresKey } from '../decorator/requires.decorator';
+import { AuthRequiredKey, RequiresKey } from '../decorator/requires.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -18,14 +18,19 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+    const targets = [context.getHandler(), context.getClass()];
 
-    const requires = this.reflector.getAllAndOverride<string>(RequiresKey, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const requires = this.reflector.getAllAndOverride<string>(
+      RequiresKey,
+      targets,
+    );
+    const authRequired = this.reflector.getAllAndOverride<boolean>(
+      AuthRequiredKey,
+      targets,
+    );
     const isAdminRoute = request.path.toLowerCase().startsWith('/admin');
 
-    if (!requires && !isAdminRoute) {
+    if (!requires && !authRequired && !isAdminRoute) {
       return true;
     }
 
@@ -43,8 +48,8 @@ export class AuthGuard implements CanActivate {
 
     request.user = payload;
 
-    const requiredRole = requires ?? 'admin';
-    if (payload.role !== requiredRole) {
+    const requiredRole = requires ?? (isAdminRoute ? 'admin' : undefined);
+    if (requiredRole && payload.role !== requiredRole) {
       throw new ForbiddenException('You do not have permission');
     }
 
