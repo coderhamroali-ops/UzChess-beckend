@@ -6,7 +6,7 @@ import { UpdateCoursesHandler } from './courses/admin/update-courses/update-cour
 import { DeleteCoursesHandler } from './courses/admin/delete-courses/delete-courses.handler';
 import { CoursesPublicController } from './courses/public/courses-public.controller';
 import { GetAllCoursesHandlerP } from './courses/public/get-all-courses/get-all-courses.handler';
-import { CoursesEntities } from './entities/courses-entities';
+import { CoursesEntities } from './entities/courses.entities';
 import { CoursesAdminController } from './courses/admin/courses-amin.controller';
 
 @Module({

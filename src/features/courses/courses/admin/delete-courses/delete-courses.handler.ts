@@ -1,5 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
-import { CoursesEntities } from '../../../entities/courses-entities';
+import { CoursesEntities } from '../../../entities/courses.entities';
 
 export class DeleteCoursesHandler {
   async execute(id: number) {

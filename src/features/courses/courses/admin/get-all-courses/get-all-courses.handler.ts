@@ -3,7 +3,7 @@ import { PaginationFilters } from '../../../../common/pagination.filter';
 import { PaginatedResultDto, PaginatedResultDtoT } from '../../../../common/dto/paginated-result.dto';
 import { Injectable } from '@nestjs/common';
 import { GetAllCoursesRequest } from './get-all-courses.request';
-import { CoursesEntities } from '../../../entities/courses-entities';
+import { CoursesEntities } from '../../../entities/courses.entities';
 
 
 @Injectable()

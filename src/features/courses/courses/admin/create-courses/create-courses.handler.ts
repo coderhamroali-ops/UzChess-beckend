@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
-import { CoursesEntities } from '../../../entities/courses-entities';
+import { CoursesEntities } from '../../../entities/courses.entities';
 
 @Injectable()
 export class CreateCoursesHandler {
