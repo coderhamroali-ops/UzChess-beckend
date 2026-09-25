@@ -18,6 +18,8 @@ import {
 import {
   DeletePurchasedCoursesHandler
 } from './purchasedCourses/admim/delete-purchasedCourses/dalete-purchasedCourses.handler';
+import { BuyCourseHandler } from './purchasedCourses/public/buy-course/buy-course.handler';
+import { GetMyPurchasesHandler } from './purchasedCourses/public/get-my-purchases/get-my-purchases.handler';
 
 
 @Module({
@@ -38,6 +40,8 @@ import {
     GetAllPurchasedCoursesHandlerPub,
     UpdatePurchasedCoursesHandler,
     DeletePurchasedCoursesHandler,
+    BuyCourseHandler,
+    GetMyPurchasesHandler,
   ],
 })
 export class PurchasedCoursesModule {}
