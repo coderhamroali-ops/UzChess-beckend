@@ -21,6 +21,7 @@ export class GetAllBooksHandlerP {
 
     const data = await BooksEntity.find({
       select: {
+        id: true,
         authorId: true,
         categoryId: true,
         languageId: true,

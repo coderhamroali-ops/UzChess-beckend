@@ -20,7 +20,7 @@ export class GetAllColorsHandlerP {
     const hasPrevious = currentPage > 1;
 
     const data = await ColorsEntities.find({
-      select: { title: true, color: true},
+      select: { id: true, title: true, color: true},
       take: take,
       skip: skip,
     });

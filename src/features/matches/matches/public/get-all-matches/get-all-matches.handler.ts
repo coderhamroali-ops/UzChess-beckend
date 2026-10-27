@@ -24,6 +24,7 @@ export class GetAllMatchesHandlerPublc {
 
     const data = await MatchesEntities.find({
       select: {
+        id: true,
         firstPlayer: true,
         firstPlayerResult: true,
         secondPlayer: true,

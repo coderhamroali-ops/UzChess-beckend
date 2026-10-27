@@ -22,7 +22,7 @@ export class GetAllLanguagesHandlerpublic {
     const hasPrevious = currentPage > 1;
 
     const data = await LanguagesEntities.find({
-      select: { title: true, code: true },
+      select: { id: true, title: true, code: true },
       take: take,
       skip: skip,
     });

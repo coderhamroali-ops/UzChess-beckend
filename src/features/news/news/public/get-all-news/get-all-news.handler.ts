@@ -22,7 +22,7 @@ export class GetAllNewsHandlerPub {
     const hasPrevious = currentPage > 1;
 
     const data = await NewsEntities.find({
-      select: { title: true, image: true, content: true, date: true},
+      select: { id: true, title: true, image: true, content: true, date: true},
       take: take,
       skip: skip,
     });

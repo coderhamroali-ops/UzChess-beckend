@@ -21,7 +21,7 @@ export class GetAllAuthorsHandlerP {
     const hasPrevious = currentPage > 1;
 
     const data = await AuthorsEntities.find({
-      select: { fullName: true },
+      select: { id: true, fullName: true },
       take: take,
       skip: skip,
     });

@@ -25,6 +25,7 @@ export class GetAllReportCategoriesHandlerPub {
 
     const data = await ReportCategoriesEntities.find({
       select: {
+        id: true,
         title: true,
         order: true,
       },

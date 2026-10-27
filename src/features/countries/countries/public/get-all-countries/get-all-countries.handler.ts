@@ -22,7 +22,7 @@ export class GetAllCountriesHandlerP {
     const hasPrevious = currentPage > 1;
 
     const data = await CountriesEntities.find({
-      select: { title: true, flag: true},
+      select: { id: true, title: true, flag: true},
       take: take,
       skip: skip,
     });

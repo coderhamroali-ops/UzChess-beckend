@@ -22,7 +22,7 @@ export class GetAllCoursesHandlerP {
     const hasPrevious = currentPage > 1;
 
     const data = await CoursesEntities.find({
-      select: { authorId: true, categoryId: true, title: true, lessonsCount: true, sectionsCount: true, rating: true, reviewsCount: true, isPublished: true, newPrice: true, price: true, image: true, difficultyId: true, languageId: true },
+      select: { id: true, authorId: true, categoryId: true, title: true, lessonsCount: true, sectionsCount: true, rating: true, reviewsCount: true, isPublished: true, newPrice: true, price: true, image: true, difficultyId: true, languageId: true },
       take: take,
       skip: skip,
     });

@@ -21,7 +21,7 @@ export class GetAllDifficultiesHandlerP {
     const hasPrevious = currentPage > 1;
 
     const data = await DifficultiesEntities.find({
-      select: { title: true },
+      select: { id: true, title: true, icon: true },
       take: take,
       skip: skip,
     });

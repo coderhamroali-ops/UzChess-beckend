@@ -20,7 +20,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "generate": "npm run build && npx typeorm -d src/data-source.ts migration:generate src/migrations/uzchess",
     "migrate": "npm run build && npx typeorm -d src/data-source.ts migration:run",
-    "revert": "npx typeorm -d src/data-source.ts migration:revert"
+    "revert": "npx typeorm -d src/data-source.ts migration:revert",
+    "seed": "npm run build && node dist/seed/seed.js"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.1.3",

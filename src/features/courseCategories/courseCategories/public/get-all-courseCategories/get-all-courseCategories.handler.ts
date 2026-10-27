@@ -20,7 +20,7 @@ export class GetAllCourseCategoriesHandlerP {
     const hasPrevious = currentPage > 1;
 
     const data = await CourseCategoriesEntities.find({
-      select: { title: true },
+      select: { id: true, title: true },
       take: take,
       skip: skip,
     });
