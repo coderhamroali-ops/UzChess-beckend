@@ -415,6 +415,39 @@ async function seedNews() {
         "\"Shaxmatni noldan o'rganish\" kursi butunlay bepul. Kurs donalarning yurishidan tortib birinchi partiyani o'ynashgacha o'rgatadi.",
       date: '2026-09-28T08:00:00Z',
     },
+    // Frontend'dagi Yangiliklar bo'limidan ko'chirilgan yozuvlar
+    {
+      title: 'Nodirbek Abdusattorov FIDE jonli reytingida 2700 balldan o‘tdi',
+      image: IMG('news-abdusattorov-2700.png'),
+      content:
+        'O‘zbekistonlik yosh grossmeyster Turkiyada o‘tkazilgan shaxmat olimpiadasida ikkita g‘alaba qozonib, shaxmat bo‘yicha jahon reytingida 2700 balldan o‘tdi.',
+      date: '2022-09-07T09:00:00Z',
+    },
+    {
+      title: '“Qo‘shnilarning buyuk jasorati”: Rossiyalik grossmeyster o‘zbek shaxmatining g‘alabasi haqida',
+      image: IMG('news-shipov.png'),
+      content:
+        'Rossiyalik grossmeyster va shaxmat bo‘yicha murabbiy Sergey Shipov O‘zbekiston terma jamoasining Hindistondagi shaxmat olimpiadasidagi o‘yinlari haqida fikr bildirdi.',
+      date: '2022-09-07T10:00:00Z',
+    },
+    {
+      title: 'Xalqaro shaxmat musobaqalari g‘oliblariga nima beriladi?',
+      image: IMG('news-sovrinlar.png'),
+      content:
+        'O‘zbekiston Prezidenti Shavkat Mirziyoyevning “Shaxmatni yanada ommalashtirish va rivojlantirishga doir qo‘shimcha chora-tadbirlar to‘g‘risida”gi qarori bilan xalqaro musobaqalar g‘oliblarini rag‘batlantirish tartibi belgilandi.',
+      date: '2022-09-07T11:00:00Z',
+    },
+    {
+      title: 'O‘zbekiston shaxmatchilari olimpiadada Armanistonlik raqiblarini mag‘lub etishdi',
+      image: IMG('news-olimpiada.png'),
+      content: [
+        'Bugun Hindistonda shaxmat bo‘yicha olimpiadada to‘qqizinchi tur o‘yinlari bo‘lib o‘tdi. Tanlov 10 avgustga qadar davom etadi.',
+        'TOSHKENT, 7 avgust – #sputnik. 44-Jahon shaxmat olimpiadasida O‘zbekiston erkaklar terma jamoasi Armanistonlik raqiblarini mag‘lub etdi. Bu haqda O‘zbekiston Sportni rivojlantirish vazirligi matbuot xizmati xabar berdi.',
+        'Ikki davlat jamoalari o‘rtasidagi bahs 3:1 hisobida O‘zbekiston foydasiga hal bo‘ldi. Shu tariqa, hech qachon mag‘lubiyatga uchramagan respublika terma jamoasi 188 ta jamoadan iborat turnir jadvalida birinchi o‘rinni egalladi. Umumiy hisobda sportchilar 16 ochko jamg‘ardi. Turnirda ikkinchi o‘rinni Hindiston, uchinchi o‘rinni Armaniston terma jamoasi egalladi. Shu bilan birga, O‘zbekiston ayollar terma jamoasi o‘yinda isroillik raqiblariga imkoniyatni boy berdi.',
+        'Bungacha o‘zbekistonlik badmintonchilar “Osiyo bolalari” xalqaro sport o‘yinlarida turli nomdagi to‘rtta medalni qo‘lga kiritgan edi.',
+      ].join('\n\n'),
+      date: '2022-08-07T12:00:00Z',
+    },
   ];
 
   for (const n of news) {

@@ -23,6 +23,7 @@ export class GetAllNewsHandlerPub {
 
     const data = await NewsEntities.find({
       select: { id: true, title: true, image: true, content: true, date: true},
+      order: { date: 'DESC' },
       take: take,
       skip: skip,
     });

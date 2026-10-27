@@ -6,6 +6,7 @@ import { UpdateNewsHandler } from './news/admin/update-news/update-news.handler'
 import { DeleteNewsHandler } from './news/admin/delete-news/delete-news.handler';
 import { NewsPublicController } from './news/public/news-public-controller';
 import { GetAllNewsHandlerPub } from './news/public/get-all-news/get-all-news.handler';
+import { GetOneNewsHandlerPub } from './news/public/get-one-news/get-one-news.handler';
 
 @Module({
   controllers: [
@@ -18,6 +19,7 @@ import { GetAllNewsHandlerPub } from './news/public/get-all-news/get-all-news.ha
     UpdateNewsHandler,
     DeleteNewsHandler,
     GetAllNewsHandlerPub,
+    GetOneNewsHandlerPub,
   ]
 })
 export class NewsModule {
