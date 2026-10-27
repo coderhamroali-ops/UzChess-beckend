@@ -8,8 +8,6 @@ import { BooksEntity } from '../features/books/entities/books.entities';
 import { ColorsEntities } from '../features/colors/entities/colors.entities';
 import { CountriesEntities } from '../features/countries/entities/countries.entities';
 import { CourseCategoriesEntities } from '../features/courseCategories/entities/courseCategories.entities';
-import { CourseLessonsEntity } from '../features/courseLessons/entities/courseLessons.entities';
-import { CourseSectionsEntity } from '../features/courseSections/entities/courseSections.entities';
 import { CoursesEntities } from '../features/courses/entities/courses.entities';
 import { DifficultiesEntities } from '../features/difficulties/entities/difficulties.entities';
 import { LanguagesEntities } from '../features/languages/entities/languages.entities';
@@ -22,8 +20,13 @@ import { SouvenirImagesEntity } from '../features/souvenirImages/entities/souven
 import { SouvenirsEntities } from '../features/souvenirs/entities/souvenirs.entities';
 import { TermsEntity } from '../features/terms/entities/terms.entities';
 
+// Ma'lumotlar Figma'dagi UzChess dizayni bilan bir xil (Asosiy, Kurslar, Kutubxona, Yangiliklar).
+// Rasmlar uploads/image/ papkasida, Figma eksportidan olingan.
+//
 // Seed qayta ishga tushirilsa ham dublikat yaratmaydi:
-// har bir yozuv `where` bo'yicha qidiriladi, topilmasa yaratiladi.
+// har bir yozuv `where` bo'yicha qidiriladi, topilsa Figma qiymatlariga yangilanadi, topilmasa yaratiladi.
+// `npm run seed -- --reset` kontent jadvallarini tozalab, faqat Figma ma'lumotlarini qoldiradi.
+
 type EntityClass<T extends BaseEntity> = { new (): T } & typeof BaseEntity;
 
 async function ensure<T extends BaseEntity>(
@@ -33,7 +36,7 @@ async function ensure<T extends BaseEntity>(
 ): Promise<T> {
   const repo = AppDataSource.getRepository<T>(entity);
   const existing = await repo.findOne({ where });
-  if (existing) return existing;
+  if (existing) return repo.save(repo.merge(existing, data as T));
   return repo.save(repo.create({ ...where, ...data } as T));
 }
 
@@ -41,38 +44,49 @@ const IMG = (name: string) => `uploads/image/${name}`;
 const ICON = (name: string) => `uploads/file/${name}`;
 const FLAG = (code: string) => `https://flagcdn.com/w80/${code}.png`;
 
-async function seedDictionaries() {
-  const bookCategories = {};
-  for (const title of ['Debyut', 'Mittelshpil', 'Endshpil', 'Taktika', 'Strategiya', 'Shaxmat tarixi']) {
-    bookCategories[title] = await ensure(Entitybook, { title }, {});
-  }
+const CONTENT_TABLES = [
+  'books', 'courses', 'course_sections', 'course_lessons', 'authors', 'book-categories',
+  'coursesCategories', 'difficulties', 'Languages', 'countries', 'players', 'Matches', 'News',
+];
 
-  const courseCategories = {};
-  for (const title of ["Boshlang'ich", 'Taktika', 'Debyut nazariyasi', 'Endshpil']) {
-    courseCategories[title] = await ensure(CourseCategoriesEntities, { title }, {});
+async function resetContent() {
+  const tables = CONTENT_TABLES.map((t) => `"${t}"`).join(', ');
+  await AppDataSource.query(`TRUNCATE ${tables} RESTART IDENTITY`);
+  console.log('Kontent jadvallari tozalandi');
+}
+
+const byTitle = async <T extends BaseEntity>(entity: EntityClass<T>, titles: string[], extra = (_: string) => ({})) => {
+  const result: Record<string, T> = {};
+  for (const title of titles) {
+    result[title] = await ensure(entity, { title } as any, extra(title));
   }
+  return result;
+};
+
+async function seedDictionaries() {
+  const bookCategories = await byTitle(Entitybook, ['Tarix', 'Adabiyot', 'Matematika']);
+  const courseCategories = await byTitle(CourseCategoriesEntities, ['Strategiya', 'Hujum qilish', 'Himoyalanish', 'Qoidalar']);
 
   const languages = {
-    uz: await ensure(LanguagesEntities, { code: 'uz' }, { title: "O'zbekcha" }),
+    uz: await ensure(LanguagesEntities, { code: 'uz' }, { title: 'O‘zbek' }),
     ru: await ensure(LanguagesEntities, { code: 'ru' }, { title: 'Русский' }),
-    en: await ensure(LanguagesEntities, { code: 'en' }, { title: 'English' }),
   };
 
   const difficulties = {
-    easy: await ensure(DifficultiesEntities, { title: "Boshlang'ich" }, { icon: ICON('file_1789505070316.svg') }),
-    medium: await ensure(DifficultiesEntities, { title: "O'rta" }, { icon: ICON('file_1789505433990.svg') }),
-    hard: await ensure(DifficultiesEntities, { title: 'Yuqori' }, { icon: ICON('file_1789505700736.svg') }),
+    beginner: await ensure(DifficultiesEntities, { title: 'Boshlang‘ich' }, { icon: ICON('file_1789505070316.svg') }),
+    amateur: await ensure(DifficultiesEntities, { title: 'Havaskor' }, { icon: ICON('file_1789505433990.svg') }),
+    pro: await ensure(DifficultiesEntities, { title: 'Professional' }, { icon: ICON('file_1789505700736.svg') }),
   };
 
   const countries = {};
   for (const [title, code] of [
-    ["O'zbekiston", 'uz'],
+    ['O‘zbekiston', 'uz'],
     ['Norvegiya', 'no'],
     ['AQSH', 'us'],
-    ['Hindiston', 'in'],
     ['Xitoy', 'cn'],
-    ['Rossiya', 'ru'],
-    ['Fransiya', 'fr'],
+    ['Armaniston', 'am'],
+    ['Vengriya', 'hu'],
+    ['Isroil', 'il'],
   ]) {
     countries[code] = await ensure(CountriesEntities, { title }, { flag: FLAG(code) });
   }
@@ -93,349 +107,184 @@ async function seedDictionaries() {
   return { bookCategories, courseCategories, languages, difficulties, countries };
 }
 
-async function seedAuthors() {
-  const authors = {};
-  for (const fullName of [
-    'Anatoly Karpov',
-    'Garri Kasparov',
-    'Xose Raul Kapablanka',
-    'Mixail Tal',
-    'Bobby Fischer',
-    'Rustam Qosimjonov',
-  ]) {
-    authors[fullName] = await ensure(AuthorsEntities, { fullName }, {});
-  }
-  return authors;
-}
+type Dictionaries = Awaited<ReturnType<typeof seedDictionaries>>;
 
-async function seedBooks(d: Awaited<ReturnType<typeof seedDictionaries>>, authors) {
-  const books = [
-    {
-      title: 'Shaxmat asoslari',
-      author: 'Xose Raul Kapablanka',
-      category: 'Strategiya',
-      difficulty: d.difficulties.easy,
-      description:
-        "Jahon chempioni Kapablankaning klassik qo'llanmasi: oddiy endshpillardan boshlab o'rta o'yin rejalari va debyut tamoyillarigacha.",
-      image: IMG('image_1789501137374.png'),
-      price: 89000,
-      newPrice: 69000,
-      rating: 4.8,
-      reviewsCount: 124,
-      pages: 240,
-      pubDate: '2023-03-12',
-    },
-    {
-      title: 'Mening buyuk o\'tmishdoshlarim',
-      author: 'Garri Kasparov',
-      category: 'Shaxmat tarixi',
-      difficulty: d.difficulties.hard,
-      description:
-        "Kasparov jahon chempionlarining eng yaxshi partiyalarini tahlil qiladi va shaxmat g'oyalarining rivojlanishini ko'rsatadi.",
-      image: IMG('image_1789505070313.png'),
-      price: 159000,
-      newPrice: 129000,
-      rating: 4.9,
-      reviewsCount: 87,
-      pages: 464,
-      pubDate: '2022-09-01',
-    },
-    {
-      title: 'Taktika sirlari',
-      author: 'Mixail Tal',
-      category: 'Taktika',
-      difficulty: d.difficulties.medium,
-      description: "Kombinatsiyalar, qurbonliklar va hujum usullari. Har bir bobda mustaqil yechish uchun mashqlar bor.",
-      image: IMG('image_1789505433990.png'),
-      price: 75000,
-      newPrice: 75000,
-      rating: 4.7,
-      reviewsCount: 63,
-      pages: 312,
-      pubDate: '2024-01-20',
-    },
-    {
-      title: "Bobby Fischer shaxmatni o'rgatadi",
-      author: 'Bobby Fischer',
-      category: 'Taktika',
-      difficulty: d.difficulties.easy,
-      description: "Mot qilish usullarini bosqichma-bosqich o'rgatadigan dasturlashtirilgan darslik.",
-      image: IMG('image_1789505700735.png'),
-      price: 65000,
-      newPrice: 49000,
-      rating: 4.6,
-      reviewsCount: 210,
-      pages: 336,
-      pubDate: '2021-06-15',
-    },
-    {
-      title: 'Endshpil ustasi',
-      author: 'Anatoly Karpov',
-      category: 'Endshpil',
-      difficulty: d.difficulties.hard,
-      description: "Piyodali va rux endshpillarining asosiy pozitsiyalari, ularni amalda qo'llash bo'yicha maslahatlar.",
-      image: IMG('image_1789505752731.png'),
-      price: 99000,
-      newPrice: 85000,
-      rating: 4.8,
-      reviewsCount: 45,
-      pages: 288,
-      pubDate: '2023-11-05',
-    },
-    {
-      title: 'Debyutlar repertuari',
-      author: 'Rustam Qosimjonov',
-      category: 'Debyut',
-      difficulty: d.difficulties.medium,
-      description: "Oq va qora donalar uchun ishonchli debyut tizimi: Italyan partiyasi, Sitsiliya himoyasi va Ferzli gambit.",
-      image: IMG('image_1789505969642.png'),
-      price: 82000,
-      newPrice: 82000,
-      rating: 4.5,
-      reviewsCount: 38,
-      pages: 256,
-      pubDate: '2024-04-10',
-    },
-  ];
+const author = (fullName: string) => ensure(AuthorsEntities, { fullName }, {});
 
-  for (const b of books) {
-    await ensure(
-      BooksEntity,
-      { title: b.title },
-      {
-        authorId: authors[b.author].id,
-        categoryId: d.bookCategories[b.category].id,
-        languageId: d.languages.uz.id,
-        difficultyId: b.difficulty.id,
-        description: b.description,
-        image: b.image,
-        price: b.price,
-        newPrice: b.newPrice,
-        rating: b.rating,
-        reviewsCount: b.reviewsCount,
-        pages: b.pages,
-        pubDate: b.pubDate as unknown as number,
-      },
-    );
-  }
-}
-
-async function seedCourses(d: Awaited<ReturnType<typeof seedDictionaries>>, authors) {
+// Figma: Education / Courses
+async function seedCourses(d: Dictionaries) {
   const courses = [
     {
-      title: "Shaxmatni noldan o'rganish",
-      author: 'Rustam Qosimjonov',
-      category: "Boshlang'ich",
-      difficulty: d.difficulties.easy,
-      image: IMG('image_1789496643023.png'),
-      price: 0,
-      newPrice: null,
-      rating: 4.9,
-      reviewsCount: 342,
-      sections: {
-        'Shaxmat taxtasi va donalar': ['Taxta va koordinatalar', 'Donalarning yurishi', 'Maxsus yurishlar: rokirovka va en passant'],
-        "O'yin maqsadi": ['Shox, mot va pat', 'Birinchi partiyangiz'],
-      },
+      title: 'Shaxmat donalari bilan tanishuv', author: 'Robert Fisher', image: 'course-shaxmat-donalari.png',
+      price: 205000, newPrice: 96000, rating: 3.5, language: d.languages.ru,
+      difficulty: d.difficulties.beginner, sectionsCount: 5, category: 'Strategiya',
     },
     {
-      title: 'Taktik kombinatsiyalar',
-      author: 'Mixail Tal',
-      category: 'Taktika',
-      difficulty: d.difficulties.medium,
-      image: IMG('image_1789501069276.png'),
-      price: 249000,
-      newPrice: 199000,
-      rating: 4.8,
-      reviewsCount: 128,
-      sections: {
-        'Asosiy taktik usullar': ['Vilka', "Bog'lash", 'Ochiq hujum'],
-        'Murakkab kombinatsiyalar': ['Qurbonlik orqali hujum', "Shohga yo'naltirilgan hujum"],
-      },
+      title: 'Shoxga hujum qilish', author: 'Andre Konfutsiy', image: 'course-shoxga-hujum.png',
+      price: 96000, newPrice: null, rating: 5.0, language: d.languages.uz,
+      difficulty: d.difficulties.beginner, sectionsCount: 6, category: 'Hujum qilish',
     },
     {
-      title: 'Debyut nazariyasi: Italyan partiyasi',
-      author: 'Garri Kasparov',
-      category: 'Debyut nazariyasi',
-      difficulty: d.difficulties.medium,
-      image: IMG('image_1789505687501.png'),
-      price: 189000,
-      newPrice: 149000,
-      rating: 4.7,
-      reviewsCount: 76,
-      sections: {
-        'Debyut tamoyillari': ['Markazni nazorat qilish', 'Donalarni rivojlantirish'],
-        'Italyan partiyasi': ['Asosiy variant', 'Giuoco Pianissimo', 'Evans gambiti'],
-      },
+      title: 'Mot qilish', author: 'David Harikon', image: 'course-mot-qilish.png',
+      price: 150000, newPrice: 107000, rating: 4.5, language: d.languages.ru,
+      difficulty: d.difficulties.pro, sectionsCount: 20, category: 'Himoyalanish',
     },
     {
-      title: 'Endshpil texnikasi',
-      author: 'Anatoly Karpov',
-      category: 'Endshpil',
-      difficulty: d.difficulties.hard,
-      image: IMG('image_1789505978619.png'),
-      price: 299000,
-      newPrice: 239000,
-      rating: 4.9,
-      reviewsCount: 54,
-      sections: {
-        'Piyodali endshpil': ['Oppozitsiya', 'Kvadrat qoidasi'],
-        'Rux endshpili': ['Lusena pozitsiyasi', 'Filidor pozitsiyasi'],
-      },
+      title: 'Asosiy taktikalar', author: 'Paul Heckler', image: 'course-asosiy-taktikalar.png',
+      price: 0, newPrice: null, rating: 5.0, language: d.languages.uz,
+      difficulty: d.difficulties.amateur, sectionsCount: 7, category: 'Qoidalar',
     },
   ];
 
   for (const c of courses) {
-    const lessonsCount = Object.values(c.sections).flat().length;
-    const course = await ensure(
+    await ensure(
       CoursesEntities,
       { title: c.title },
       {
-        authorId: authors[c.author].id,
+        authorId: (await author(c.author)).id,
         categoryId: d.courseCategories[c.category].id,
-        languageId: d.languages.uz.id,
+        languageId: c.language.id,
         difficultyId: c.difficulty.id,
-        image: c.image,
+        image: IMG(c.image),
         price: c.price,
         newPrice: c.newPrice ?? undefined,
         isPublished: true,
         rating: c.rating,
-        reviewsCount: c.reviewsCount,
-        sectionsCount: Object.keys(c.sections).length,
-        lessonsCount,
+        reviewsCount: 0,
+        sectionsCount: c.sectionsCount,
+        lessonsCount: 0,
       },
     );
-
-    let lessonOrder = 0;
-    for (const [sectionOrder, [sectionTitle, lessons]] of Object.entries(c.sections).entries()) {
-      const section = await ensure(
-        CourseSectionsEntity,
-        { courseId: course.id, title: sectionTitle },
-        { order: sectionOrder + 1, date: new Date() },
-      );
-      for (const title of lessons) {
-        lessonOrder++;
-        await ensure(
-          CourseLessonsEntity,
-          { courseSectionId: section.id, title },
-          {
-            courseId: course.id,
-            content: `${title} mavzusi bo'yicha video dars va mashqlar.`,
-            thumbnail: c.image,
-            video: `uploads/video/course-${course.id}-lesson-${lessonOrder}.mp4`,
-            order: lessonOrder,
-            date: new Date(),
-            isFree: lessonOrder <= 2,
-          },
-        );
-      }
-    }
   }
 }
 
+// Figma: Library
+async function seedBooks(d: Dictionaries) {
+  const books = [
+    {
+      title: 'Bobbi Fisher shaxmatni o‘ynashni o‘rganing', author: 'Robert Fisher', image: 'book-fischer-teaches-chess.svg',
+      price: 205000, newPrice: 155000, language: d.languages.ru, difficulty: d.difficulties.beginner, category: 'Tarix',
+      description: 'Bobbi Fisherning shaxmatni o‘rgatuvchi dasturlashtirilgan darsligi.',
+    },
+    {
+      title: 'Bobbi Fisher shaxmatni o‘ynashni o‘rganing', author: 'Jonatan Dez', image: 'book-silman-reassess.svg',
+      price: 180000, newPrice: 0, language: d.languages.uz, difficulty: d.difficulties.amateur, category: 'Adabiyot',
+      description: 'Shaxmatdagi qobiliyatlaringizga qayta baho berish bo‘yicha qo‘llanma.',
+    },
+    {
+      title: 'Mening tizimim', author: 'Andre Miladze', image: 'book-my-system.svg',
+      price: 0, newPrice: 0, language: d.languages.ru, difficulty: d.difficulties.amateur, category: 'Matematika',
+      description: 'Pozitsion o‘yin tamoyillari haqidagi klassik kitob.',
+    },
+    {
+      title: 'Zurixdagi shaxmat musobaqasi', author: 'David Bronstein', image: 'book-zurich-1953.svg',
+      price: 120000, newPrice: 0, language: d.languages.uz, difficulty: d.difficulties.pro, category: 'Tarix',
+      description: '1953-yilgi Zurix turniri partiyalarining tahlili.',
+    },
+    {
+      title: 'Mening esdaqolarlik o‘yinlarim', author: 'Mikhail Litvin', image: 'book-fischer-60-games.svg',
+      price: 200000, newPrice: 189000, language: d.languages.ru, difficulty: d.difficulties.beginner, category: 'Matematika',
+      description: 'Bobbi Fisherning 60 ta esda qolarli partiyasi.',
+    },
+  ];
+
+  for (const b of books) {
+    const authorId = (await author(b.author)).id;
+    await ensure(
+      BooksEntity,
+      { title: b.title, authorId },
+      {
+        categoryId: d.bookCategories[b.category].id,
+        languageId: b.language.id,
+        difficultyId: b.difficulty.id,
+        description: b.description,
+        image: IMG(b.image),
+        price: b.price,
+        newPrice: b.newPrice,
+        rating: 3.5,
+        reviewsCount: 0,
+        pages: 250,
+        pubDate: '2022-09-07' as unknown as number,
+      },
+    );
+  }
+}
+
+// Figma: Main — Reyting va Yakunlangan o'yinlar.
+// classic — Reyting ro'yxati; rapid/blitz — o'yinlar jadvalida o'yin turiga qarab ko'rsatiladi.
 async function seedPlayers(countries) {
-  // Reytinglar taxminiy, faqat demo uchun.
   const players = [
-    ['Magnus Carlsen', 'no', 2830, 2820, 2880],
-    ['Nodirbek Abdusattorov', 'uz', 2770, 2750, 2760],
-    ['Hikaru Nakamura', 'us', 2800, 2790, 2900],
-    ['Javokhir Sindarov', 'uz', 2730, 2700, 2710],
-    ['Gukesh Dommaraju', 'in', 2780, 2720, 2700],
-    ['Ding Liren', 'cn', 2740, 2730, 2750],
-    ['Nodirbek Yakubboev', 'uz', 2690, 2670, 2680],
-    ['Ian Nepomniachtchi', 'ru', 2760, 2770, 2800],
-    ['Alireza Firouzja', 'fr', 2760, 2740, 2820],
-    ['Shamsiddin Vokhidov', 'uz', 2650, 2640, 2660],
+    ['Magnus Carlsen', 'no', 2861, null, null, 'player-carlsen.svg'],
+    ['Hikaru Nakamura', 'us', 2850, 2768, null],
+    ['Abdusattorov Nodirbek', 'uz', 2842, null, 2604],
+    ['Sindarov Javokhir', 'uz', 2839, null, 2641],
+    ['Yakubboev Nodirbek', 'uz', 2839, null, 2402],
+    ['Shohrukh Bakhtiyarov', 'uz', 2600, 2861, null],
+    ['Ding Liren', 'cn', 2750, null, 2312],
+    ['Aronian Levon', 'us', 2730, null, 2402],
+    ['Caruana Fabiano', 'us', 2790, null, 2402],
+    ['Rapport Richard', 'hu', 2720, null, 2641],
+    ['Gelfand Boris', 'il', 2670, null, 2641],
   ] as const;
 
-  const images = ['image_1789496643025.png', 'image_1789501069278.png', 'image_1789501137375.png', 'image_1789505987315.png'];
-  const result = {};
-  for (const [i, [fulName, code, classic, rapid, blitz]] of players.entries()) {
+  const result: Record<string, PlayersEntities> = {};
+  for (const [fulName, code, classic, rapid, blitz, image] of players) {
     result[fulName] = await ensure(
       PlayersEntities,
       { fulName },
-      { countryId: countries[code].id, image: IMG(images[i % images.length]), classic, rapid, blitz },
+      {
+        countryId: countries[code].id,
+        image: IMG(image ?? 'player-default.svg'),
+        classic,
+        rapid: rapid ?? undefined,
+        blitz: blitz ?? undefined,
+      },
     );
   }
   return result;
 }
 
-async function seedMatches(players) {
-  const matches: [string, string, MatchType, number, winnerType, string][] = [
-    ['Magnus Carlsen', 'Nodirbek Abdusattorov', MatchType.Classic, 54, winnerType.draw, '2026-09-14'],
-    ['Javokhir Sindarov', 'Gukesh Dommaraju', MatchType.Rapid, 41, winnerType.first, '2026-09-20'],
-    ['Hikaru Nakamura', 'Alireza Firouzja', MatchType.Blitz, 37, winnerType.second, '2026-10-02'],
-    ['Nodirbek Yakubboev', 'Ding Liren', MatchType.Classic, 63, winnerType.draw, '2026-10-11'],
-    ['Nodirbek Abdusattorov', 'Ian Nepomniachtchi', MatchType.Rapid, 48, winnerType.first, '2026-10-18'],
+async function seedMatches(players: Record<string, PlayersEntities>) {
+  const matches: [string, number, string, number, MatchType, number, winnerType, string][] = [
+    ['Shohrukh Bakhtiyarov', 2, 'Hikaru Nakamura', 0, MatchType.Rapid, 56, winnerType.first, '2025-12-12'],
+    ['Abdusattorov Nodirbek', 1, 'Ding Liren', 0, MatchType.Bullet, 20, winnerType.first, '2025-11-21'],
+    ['Aronian Levon', 0, 'Sindarov Javokhir', 2, MatchType.Blitz, 19, winnerType.second, '2025-10-19'],
+    ['Caruana Fabiano', 1, 'Rapport Richard', 1, MatchType.Blitz, 56, winnerType.draw, '2025-09-02'],
+    ['Yakubboev Nodirbek', 4, 'Gelfand Boris', 1, MatchType.Bullet, 56, winnerType.first, '2025-09-01'],
   ];
 
-  for (const [first, second, type, moves, winner, date] of matches) {
-    const score = { [winnerType.first]: [1, 0], [winnerType.second]: [0, 1], [winnerType.draw]: [0.5, 0.5] }[winner];
+  for (const [first, firstPlayerResult, second, secondPlayerResult, type, moves, winner, date] of matches) {
     await ensure(
       MatchesEntities,
       { firstPlayer: players[first].id, secondPlayer: players[second].id, date },
-      {
-        // Natija butun son ustunida saqlanadi: g'alaba 2, durang 1, mag'lubiyat 0.
-        firstPlayerResult: score[0] * 2,
-        secondPlayerResult: score[1] * 2,
-        type,
-        moves,
-        winner,
-      },
+      { firstPlayerResult, secondPlayerResult, type, moves, winner },
     );
   }
 }
 
+// Figma: Main / News
 async function seedNews() {
   const news = [
-    {
-      title: 'UzChess platformasida yangi "Endshpil texnikasi" kursi',
-      image: IMG('image_1789505978619.png'),
-      content:
-        "Platformamizga endshpil bo'yicha yangi kurs qo'shildi. Kurs piyodali va rux endshpillarining asosiy pozitsiyalarini o'z ichiga oladi.",
-      date: '2026-10-20T10:00:00Z',
-    },
-    {
-      title: "Haftalik onlayn turnir: ro'yxatdan o'tish ochildi",
-      image: IMG('image_1789501069276.png'),
-      content:
-        "Har shanba kuni soat 20:00 da blits turniri o'tkaziladi. G'oliblar UzChess do'konidan sovg'alar va kurslarga chegirma oladi.",
-      date: '2026-10-15T09:00:00Z',
-    },
-    {
-      title: "Kutubxonaga 6 ta yangi kitob qo'shildi",
-      image: IMG('image_1789501137374.png'),
-      content:
-        "Kapablanka, Kasparov va Karpov kitoblarining o'zbekcha nashrlari endi kutubxonada. Ayrim kitoblarga 30% gacha chegirma amal qiladi.",
-      date: '2026-10-08T12:30:00Z',
-    },
-    {
-      title: "Bolalar uchun shaxmat: bepul boshlang'ich kurs",
-      image: IMG('image_1789496643023.png'),
-      content:
-        "\"Shaxmatni noldan o'rganish\" kursi butunlay bepul. Kurs donalarning yurishidan tortib birinchi partiyani o'ynashgacha o'rgatadi.",
-      date: '2026-09-28T08:00:00Z',
-    },
-    // Frontend'dagi Yangiliklar bo'limidan ko'chirilgan yozuvlar
     {
       title: 'Nodirbek Abdusattorov FIDE jonli reytingida 2700 balldan o‘tdi',
       image: IMG('news-abdusattorov-2700.png'),
       content:
         'O‘zbekistonlik yosh grossmeyster Turkiyada o‘tkazilgan shaxmat olimpiadasida ikkita g‘alaba qozonib, shaxmat bo‘yicha jahon reytingida 2700 balldan o‘tdi.',
-      date: '2022-09-07T09:00:00Z',
+      date: '2022-09-07T12:00:00Z',
     },
     {
       title: '“Qo‘shnilarning buyuk jasorati”: Rossiyalik grossmeyster o‘zbek shaxmatining g‘alabasi haqida',
       image: IMG('news-shipov.png'),
       content:
         'Rossiyalik grossmeyster va shaxmat bo‘yicha murabbiy Sergey Shipov O‘zbekiston terma jamoasining Hindistondagi shaxmat olimpiadasidagi o‘yinlari haqida fikr bildirdi.',
-      date: '2022-09-07T10:00:00Z',
+      date: '2022-09-07T11:00:00Z',
     },
     {
       title: 'Xalqaro shaxmat musobaqalari g‘oliblariga nima beriladi?',
       image: IMG('news-sovrinlar.png'),
       content:
         'O‘zbekiston Prezidenti Shavkat Mirziyoyevning “Shaxmatni yanada ommalashtirish va rivojlantirishga doir qo‘shimcha chora-tadbirlar to‘g‘risida”gi qarori bilan xalqaro musobaqalar g‘oliblarini rag‘batlantirish tartibi belgilandi.',
-      date: '2022-09-07T11:00:00Z',
+      date: '2022-09-07T10:00:00Z',
     },
     {
       title: 'O‘zbekiston shaxmatchilari olimpiadada Armanistonlik raqiblarini mag‘lub etishdi',
@@ -446,7 +295,7 @@ async function seedNews() {
         'Ikki davlat jamoalari o‘rtasidagi bahs 3:1 hisobida O‘zbekiston foydasiga hal bo‘ldi. Shu tariqa, hech qachon mag‘lubiyatga uchramagan respublika terma jamoasi 188 ta jamoadan iborat turnir jadvalida birinchi o‘rinni egalladi. Umumiy hisobda sportchilar 16 ochko jamg‘ardi. Turnirda ikkinchi o‘rinni Hindiston, uchinchi o‘rinni Armaniston terma jamoasi egalladi. Shu bilan birga, O‘zbekiston ayollar terma jamoasi o‘yinda isroillik raqiblariga imkoniyatni boy berdi.',
         'Bungacha o‘zbekistonlik badmintonchilar “Osiyo bolalari” xalqaro sport o‘yinlarida turli nomdagi to‘rtta medalni qo‘lga kiritgan edi.',
       ].join('\n\n'),
-      date: '2022-08-07T12:00:00Z',
+      date: '2022-09-07T09:00:00Z',
     },
   ];
 
@@ -517,10 +366,10 @@ async function seedTerms() {
 async function main() {
   await AppDataSource.initialize();
   try {
+    if (process.argv.includes('--reset')) await resetContent();
     const dictionaries = await seedDictionaries();
-    const authors = await seedAuthors();
-    await seedBooks(dictionaries, authors);
-    await seedCourses(dictionaries, authors);
+    await seedCourses(dictionaries);
+    await seedBooks(dictionaries);
     const players = await seedPlayers(dictionaries.countries);
     await seedMatches(players);
     await seedNews();

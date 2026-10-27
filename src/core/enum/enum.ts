@@ -1,7 +1,8 @@
 export enum MatchType{
   Classic,
   Rapid,
-  Blitz
+  Blitz,
+  Bullet
 }
 
 export enum winnerType {
