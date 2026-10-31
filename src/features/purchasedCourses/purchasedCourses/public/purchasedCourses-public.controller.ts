@@ -13,18 +13,22 @@ import {
 
 @Controller('public/purchased-courses')
 export class PurchasedCoursesPublicController {
-
   constructor(
     private getAllHandler: GetAllPurchasedCoursesHandlerPub,
     private buyCourseHandler: BuyCourseHandler,
     private getMyPurchasesHandler: GetMyPurchasesHandler,
   ) {}
 
+  /** Faqat joriy foydalanuvchining yozuvlari */
+
+  @Auth()
   @Get('list')
   async getAll(
+    @CurrentUser() user: TokenPayload,
+
     @Query() filter: GetAllPurchasedCoursesReques,
   ) {
-    return await this.getAllHandler.execute(filter);
+    return await this.getAllHandler.execute(user.sub, filter);
   }
 
   @Auth()

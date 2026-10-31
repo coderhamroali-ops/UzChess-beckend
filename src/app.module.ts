@@ -35,6 +35,7 @@ import { CourseLessonsModule } from './features/courseLessons/courseLessons.modu
 import { ReportsModule } from './features/reports/reports.module';
 import { UsersLessonsModule } from './features/users_lessons/users_lessons.module';
 import { TermsModule } from './features/terms/terms.module';
+import { RolesModule } from './features/roles/roles.module';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { TermsModule } from './features/terms/terms.module';
     ReportsModule,
     UsersLessonsModule,
     TermsModule,
+    RolesModule,
     AuthModule,
   ],
 })

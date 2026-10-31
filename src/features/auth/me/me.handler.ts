@@ -1,5 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersEntities } from '../../users/entities/users.entities';
+import { isStaff, permissionsOf } from '../../../core/rbac/permissions';
+import { role } from '../../../core/enum/enum';
 
 @Injectable()
 export class MeHandler {
@@ -23,6 +25,11 @@ export class MeHandler {
       throw new UnauthorizedException('User not found or inactive');
     }
 
-    return user;
+    return {
+      ...user,
+      isStaff: isStaff(user.role),
+      permissions:
+        user.role === role.SUPER_ADMIN ? ['*'] : permissionsOf(user.role),
+    };
   }
 }

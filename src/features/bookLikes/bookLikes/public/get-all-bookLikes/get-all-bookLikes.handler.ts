@@ -10,31 +10,27 @@ import { BookLikesEntity } from '../../../entities/bookLikes.entities';
 
 @Injectable()
 export class GetAllBookLikesHandlerPub {
-
   @ApiOkResponse({
     type: PaginatedResultDtoT(GetAllBookLikesRequest),
   })
-  async execute(query: PaginationFilters) {
-
+  async execute(userId: number, query: PaginationFilters) {
     const currentPage = query.page ?? 1;
     const take = query.size ?? 3;
     const skip = (currentPage - 1) * take;
 
-    const totalCount = await BookLikesEntity.count();
+    const totalCount = await BookLikesEntity.count({ where: { userId } });
 
-    const totalPages = Math.ceil(
-      totalCount / take,
-    );
+    const totalPages = Math.ceil(totalCount / take);
 
     const hasNext = currentPage < totalPages;
     const hasPrevious = currentPage > 1;
 
     const data = await BookLikesEntity.find({
+      where: { userId },
       select: {
         id: true,
         userId: true,
         bookId: true,
-
       },
       take,
       skip,

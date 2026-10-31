@@ -1,7 +1,10 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
 } from '@nestjs/common';
+import { TokenPayload } from '../../../../../core/decorator/current-user.decorator';
+import { canManageRole } from '../../../../../core/rbac/permissions';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -11,14 +14,17 @@ import { CreateUsersRequest } from './create-user.request';
 
 @Injectable()
 export class CreateUsersHandler {
-
   constructor(
     @InjectRepository(UsersEntities)
     private readonly usersRepository: Repository<UsersEntities>,
-  ) {
-  }
+  ) {}
 
-  async execute(payload: CreateUsersRequest) {
+  async execute(actor: TokenPayload, payload: CreateUsersRequest) {
+    if (!canManageRole(actor.role, payload.role)) {
+      throw new ForbiddenException(
+        `You cannot create a user with role "${payload.role}"`,
+      );
+    }
 
     const loginExists = await this.usersRepository.existsBy({
       login: ILike(payload.login),

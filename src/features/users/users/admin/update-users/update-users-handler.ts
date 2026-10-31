@@ -1,8 +1,11 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { TokenPayload } from '../../../../../core/decorator/current-user.decorator';
+import { canManageRole } from '../../../../../core/rbac/permissions';
 import { ILike, Not } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
@@ -11,17 +14,23 @@ import { UsersEntities } from '../../../entities/users.entities';
 
 @Injectable()
 export class UpdateUsersHandler {
-
-  async execute(
-    id: number,
-    payload: UpdateUsersRequest,
-  ) {
+  async execute(actor: TokenPayload, id: number, payload: UpdateUsersRequest) {
     const user = await UsersEntities.findOneBy({
       id: id,
     });
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    if (
+      !canManageRole(actor.role, user.role) ||
+      !canManageRole(actor.role, payload.role)
+    ) {
+      throw new ForbiddenException('You cannot manage users with this role');
+    }
+    if (user.id === actor.sub && payload.role !== user.role) {
+      throw new ForbiddenException('You cannot change your own role');
     }
 
     const loginExists = await UsersEntities.exists({

@@ -18,10 +18,13 @@ import { GetAllUsersHandler } from './get-all-user/get-all-users.handler';
 import { UpdateUsersHandler } from './update-users/update-users-handler';
 import { CreateUsersRequest } from './create-users/create-user.request';
 import { GetAllUsersRequest } from './get-all-user/get-all-users.request';
+import {
+  CurrentUser,
+  TokenPayload,
+} from '../../../../core/decorator/current-user.decorator';
 
 @Controller('admin/users')
 export class UsersAdminController {
-
   constructor(
     private createHandler: CreateUsersHandler,
     private getAllHandler: GetAllUsersHandler,
@@ -31,30 +34,31 @@ export class UsersAdminController {
 
   @Post('create')
   async create(
+    @CurrentUser() actor: TokenPayload,
     @Body() payload: CreateUsersRequest,
   ) {
-    return await this.createHandler.execute(payload);
+    return await this.createHandler.execute(actor, payload);
   }
 
   @Get('list')
-  async getAll(
-    @Query() filter: GetAllUsersRequest,
-  ) {
+  async getAll(@Query() filter: GetAllUsersRequest) {
     return await this.getAllHandler.execute(filter);
   }
 
   @Patch('update/:id')
   async update(
+    @CurrentUser() actor: TokenPayload,
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: UpdateUsersRequest,
   ) {
-    return await this.updateHandler.execute(id, payload);
+    return await this.updateHandler.execute(actor, id, payload);
   }
 
   @Delete('delete/:id')
   async delete(
+    @CurrentUser() actor: TokenPayload,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return await this.deleteHandler.execute(id);
+    return await this.deleteHandler.execute(actor, id);
   }
 }

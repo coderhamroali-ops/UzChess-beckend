@@ -10,26 +10,23 @@ import { GetAllReportsRequest } from './get-all-reports.request';
 
 @Injectable()
 export class GetAllReportsHandlerPub {
-
   @ApiOkResponse({
     type: PaginatedResultDtoT(GetAllReportsRequest),
   })
-  async execute(query: PaginationFilters) {
-
+  async execute(userId: number, query: PaginationFilters) {
     const currentPage = query.page ?? 1;
     const take = query.size ?? 3;
     const skip = (currentPage - 1) * take;
 
-    const totalCount = await ReportsEntity.count();
+    const totalCount = await ReportsEntity.count({ where: { userId } });
 
-    const totalPages = Math.ceil(
-      totalCount / take,
-    );
+    const totalPages = Math.ceil(totalCount / take);
 
     const hasNext = currentPage < totalPages;
     const hasPrevious = currentPage > 1;
 
     const data = await ReportsEntity.find({
+      where: { userId },
       select: {
         id: true,
         userId: true,

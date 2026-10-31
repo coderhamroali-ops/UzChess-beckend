@@ -13,19 +13,31 @@ export class AdminSeedService implements OnApplicationBootstrap {
     const password = process.env.ADMIN_PASSWORD;
 
     if (!login || !password) {
-      this.logger.warn('ADMIN_LOGIN / ADMIN_PASSWORD not set, admin not created');
+      this.logger.warn(
+        'ADMIN_LOGIN / ADMIN_PASSWORD not set, admin not created',
+      );
       return;
     }
 
-    const adminExists = await UsersEntities.exists({
-      where: { role: role.ADMIN },
+    const superAdminExists = await UsersEntities.exists({
+      where: { role: role.SUPER_ADMIN },
     });
-    if (adminExists) {
+    if (superAdminExists) {
+      return;
+    }
+
+    // Avvalgi versiyada yaratilgan admin bo'lsa — uni superAdmin qilamiz
+    const existing = await UsersEntities.findOneBy({ login });
+    if (existing) {
+      existing.role = role.SUPER_ADMIN;
+      existing.isActive = true;
+      await existing.save();
+      this.logger.log(`Promoted ${login} to superAdmin`);
       return;
     }
 
     const admin = UsersEntities.create({
-      role: role.ADMIN,
+      role: role.SUPER_ADMIN,
       fullName: 'Admin',
       login,
       loginType: loginType.EMAIL,
@@ -35,6 +47,6 @@ export class AdminSeedService implements OnApplicationBootstrap {
     });
     await admin.save();
 
-    this.logger.log(`First admin created: ${login}`);
+    this.logger.log(`First super admin created: ${login}`);
   }
 }

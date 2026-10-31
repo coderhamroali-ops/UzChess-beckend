@@ -12,17 +12,15 @@ import { GetAllUsersRequest } from './get-all-users.request';
 
 @Injectable()
 export class GetAllUsersHandlerPub {
-
   @ApiOkResponse({
     type: PaginatedResultDtoT(GetAllUsersRequest),
   })
   async execute(query: PaginationFilters) {
-
     const currentPage = query.page ?? 1;
     const take = query.size ?? 10;
     const skip = (currentPage - 1) * take;
 
-    const totalCount = await UsersEntities.count();
+    const totalCount = await UsersEntities.count({ where: { isActive: true } });
 
     const totalPages = Math.ceil(totalCount / take);
 
@@ -30,16 +28,12 @@ export class GetAllUsersHandlerPub {
     const hasPrevious = currentPage > 1;
 
     const data = await UsersEntities.find({
+      // Ommaviy ro'yxatda shaxsiy ma'lumotlar (login, rol, tug'ilgan sana) berilmaydi
+      where: { isActive: true },
       select: {
         id: true,
-        role: true,
         fullName: true,
         profileImage: true,
-        login: true,
-        loginType: true,
-        birthDate: true,
-        isVerified: true,
-        isActive: true,
       },
       take: take,
       skip: skip,

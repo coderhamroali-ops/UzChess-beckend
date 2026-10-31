@@ -10,16 +10,15 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GetAllSouvenirLikesHandlerPub {
-
   @ApiOkResponse({
     type: PaginatedResultDtoT(GetAllSouvenirLikesRequest),
   })
-  async execute(query: PaginationFilters) {
+  async execute(userId: number, query: PaginationFilters) {
     const currentPage = query.page ?? 1;
     const take = query.size ?? 3;
     const skip = (currentPage - 1) * take;
 
-    const totalCount = await SouvenirLikesEntity.count();
+    const totalCount = await SouvenirLikesEntity.count({ where: { userId } });
 
     const totalPages = Math.ceil(totalCount / take);
 
@@ -27,6 +26,7 @@ export class GetAllSouvenirLikesHandlerPub {
     const hasPrevious = currentPage > 1;
 
     const data = await SouvenirLikesEntity.find({
+      where: { userId },
       select: {
         id: true,
         userId: true,

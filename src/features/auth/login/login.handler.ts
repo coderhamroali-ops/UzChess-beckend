@@ -10,25 +10,15 @@ export class LoginHandler {
   constructor(private readonly jwtService: JwtService) {}
 
   async execute(payload: LoginRequest) {
-    console.log('LOGIN PAYLOAD:', payload);
-
     const user = await UsersEntities.findOneBy({
       login: payload.login,
     });
 
-    console.log('FOUND USER:', user);
-
     if (!user || !user.password || !user.isActive) {
-      console.log('USER CHECK FAILED');
       throw new UnauthorizedException('Login or password is incorrect');
     }
 
-    const isMatch = await bcrypt.compare(
-      payload.password,
-      user.password,
-    );
-
-    console.log('PASSWORD MATCH:', isMatch);
+    const isMatch = await bcrypt.compare(payload.password, user.password);
 
     if (!isMatch) {
       throw new UnauthorizedException('Login or password is incorrect');

@@ -10,26 +10,23 @@ import { GetAllUsers_lessonsRequest } from './get-all-users_lessons.request';
 
 @Injectable()
 export class GetAllUsersLessonsHandlerPub {
-
   @ApiOkResponse({
     type: PaginatedResultDtoT(GetAllUsers_lessonsRequest),
   })
-  async execute(query: PaginationFilters) {
-
+  async execute(userId: number, query: PaginationFilters) {
     const currentPage = query.page ?? 1;
     const take = query.size ?? 3;
     const skip = (currentPage - 1) * take;
 
-    const totalCount = await UsersLessonsEntity.count();
+    const totalCount = await UsersLessonsEntity.count({ where: { userId } });
 
-    const totalPages = Math.ceil(
-      totalCount / take,
-    );
+    const totalPages = Math.ceil(totalCount / take);
 
     const hasNext = currentPage < totalPages;
     const hasPrevious = currentPage > 1;
 
     const data = await UsersLessonsEntity.find({
+      where: { userId },
       select: {
         id: true,
         userId: true,

@@ -1,40 +1,36 @@
-export enum MatchType{
+export enum MatchType {
   Classic,
   Rapid,
-  Blitz
+  Blitz,
 }
 
 export enum winnerType {
   first,
   second,
-  draw
+  draw,
 }
 
+/**
+ * Foydalanuvchi rollari (eng kuchsizdan eng kuchliga).
+ * Qaysi rol nima qila olishi `core/rbac/permissions.ts` dagi
+ * ROLE_PERMISSIONS jadvalida belgilangan.
+ */
 export enum role {
-  user,
-  admin,
-  superAdmin,
+  USER = 'user',
+  MODERATOR = 'moderator',
+  ADMIN = 'admin',
+  SUPER_ADMIN = 'superAdmin',
 }
 
 export enum loginType {
-  email,
-  number,
+  EMAIL = 'email',
+  PHONE = 'phone',
 }
 
 export enum otpType {
   register,
   passwordReset,
   numberChange,
-}
-
-export enum role {
-  USER = 'user',
-  ADMIN = 'admin',
-}
-
-export enum loginType {
-  EMAIL = 'email',
-  PHONE = 'phone',
 }
 
 export enum cartItemType {
